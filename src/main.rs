@@ -200,7 +200,12 @@ fn main() {
     });
 }
 
-fn build_ui(egui_glium: &mut egui_glium::EguiGlium, window: &winit::window::Window, animation_data: &mut AnimationData, fps: f64) {
+fn build_ui(
+    egui_glium: &mut egui_glium::EguiGlium,
+    window: &winit::window::Window,
+    animation_data: &mut AnimationData,
+    fps: f64,
+) {
     egui_glium.run(window, |egui_ctx| {
         egui::Window::new("panel")
             .auto_sized()
@@ -268,16 +273,23 @@ fn build_ui(egui_glium: &mut egui_glium::EguiGlium, window: &winit::window::Wind
 
                             flex.add(item(), Button::new("run"));
                         });
-                        build_xyz_settings(
-                            flex,
-                            &mut animation_data.begin_rotation_xyz,
-                            RichText::new("Begin Euler Angle").size(15f32),
-                        );
-                        build_xyz_settings(
-                            flex,
-                            &mut animation_data.end_rotation_xyz,
-                            RichText::new("End Euler Angle").size(15f32),
-                        );
+
+                        flex.add_flex(item(), Flex::vertical(), |flex| {
+                            flex.add_flex(item(), Flex::horizontal(), |flex| {
+                                build_xyz_settings(
+                                    flex,
+                                    &mut animation_data.begin_rotation_xyz,
+                                    RichText::new("Begin Euler Angle").size(15f32),
+                                );
+                                build_xyz_settings(
+                                    flex,
+                                    &mut animation_data.end_rotation_xyz,
+                                    RichText::new("End Euler Angle").size(15f32),
+                                );
+                            });
+
+                            flex.add(item(), Button::new("run"));
+                        });
                     });
                 ui.label(RichText::new(format!("FPS: {:.1}", fps)).size(15f32));
             });
