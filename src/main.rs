@@ -2,9 +2,9 @@ mod animation_data;
 mod infinite_grid_drawer;
 mod vertex;
 
-use animation_data::AnimationData;
+use animation_data::{AnimationData, QuternionInterpolationType};
 use chrono::Local;
-use egui::{DragValue, Label, RichText, ViewportId, WidgetText};
+use egui::{Button, DragValue, Label, RadioButton, RichText, ViewportId, WidgetText};
 use egui_flex::{item, Flex};
 use glium::{Blend, Rect, Surface};
 use infinite_grid_drawer::InfiniteGridDrawer;
@@ -87,16 +87,55 @@ fn main() {
                                     &mut animation_data.end_position,
                                     RichText::new("End Position").size(15f32),
                                 );
-                                build_wxyz_settings(
-                                    flex,
-                                    &mut animation_data.begin_rotation_quaternion,
-                                    RichText::new("Begin Quternion").size(15f32),
-                                );
-                                build_wxyz_settings(
-                                    flex,
-                                    &mut animation_data.end_rotation_quaternion,
-                                    RichText::new("End Quternion").size(15f32),
-                                );
+
+                                flex.add_flex(item(), Flex::vertical(), |flex| {
+                                    flex.add_flex(item(), Flex::horizontal(), |flex| {
+                                        build_wxyz_settings(
+                                            flex,
+                                            &mut animation_data.begin_rotation_quaternion,
+                                            RichText::new("Begin Quternion").size(15f32),
+                                        );
+                                        build_wxyz_settings(
+                                            flex,
+                                            &mut animation_data.end_rotation_quaternion,
+                                            RichText::new("End Quternion").size(15f32),
+                                        );
+                                    });
+
+                                    if flex
+                                        .add(
+                                            item().align_self(egui_flex::FlexAlign::Start),
+                                            RadioButton::new(
+                                                animation_data.quternion_interpolation_type
+                                                    == QuternionInterpolationType::Linear,
+                                                "Linear",
+                                            ),
+                                        )
+                                        .inner
+                                        .clicked()
+                                    {
+                                        animation_data.quternion_interpolation_type =
+                                            QuternionInterpolationType::Linear;
+                                    }
+
+                                    if flex
+                                        .add(
+                                            item().align_self(egui_flex::FlexAlign::Start),
+                                            RadioButton::new(
+                                                animation_data.quternion_interpolation_type
+                                                    == QuternionInterpolationType::Spherical,
+                                                "Spherical",
+                                            ),
+                                        )
+                                        .inner
+                                        .clicked()
+                                    {
+                                        animation_data.quternion_interpolation_type =
+                                            QuternionInterpolationType::Spherical;
+                                    }
+
+                                    flex.add(item(), Button::new("run"));
+                                });
                                 build_xyz_settings(
                                     flex,
                                     &mut animation_data.begin_rotation_xyz,
