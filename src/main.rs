@@ -9,8 +9,8 @@ use nalgebra::{Matrix4, Point3, Vector3, Vector4};
 use winit::event::{self, ElementState, MouseButton};
 
 fn main() {
-    let width = 1600;
-    let height = 1200;
+    let mut width = 1600;
+    let mut height = 1200;
 
     let event_loop = winit::event_loop::EventLoopBuilder::new().build().unwrap();
     let (window, display) = glium::backend::glutin::SimpleWindowBuilder::new()
@@ -104,6 +104,8 @@ fn main() {
                             0.1,
                             100.0,
                         );
+                        width = new_size.width;
+                        height = new_size.height;
                     }
                     WindowEvent::CursorMoved { position, .. } => {
                         let delta = (position.x - mouse_position.0, position.y - mouse_position.1);
