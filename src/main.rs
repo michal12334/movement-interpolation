@@ -76,11 +76,21 @@ fn main() {
 
             target.clear_color_and_depth((0.0, 0.0, 0.0, 1.0), 1.0);
 
-            drawing_parameters.viewport = Some(Rect { left: 0, bottom: 0, width: width / 2, height: height });
+            drawing_parameters.viewport = Some(Rect {
+                left: 0,
+                bottom: 0,
+                width: width / 2,
+                height: height,
+            });
 
             infinite_grid_drawer.draw(&mut target, &perspective, &view, &drawing_parameters);
 
-            drawing_parameters.viewport = Some(Rect { left: width / 2, bottom: 0, width: width / 2, height: height });
+            drawing_parameters.viewport = Some(Rect {
+                left: width / 2,
+                bottom: 0,
+                width: width / 2,
+                height: height,
+            });
 
             infinite_grid_drawer.draw(&mut target, &perspective, &view, &drawing_parameters);
 
