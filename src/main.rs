@@ -4,7 +4,9 @@ mod vertex;
 
 use animation_data::{AnimationData, QuternionInterpolationType};
 use chrono::Local;
-use egui::{Button, DragValue, Label, RadioButton, RichText, ViewportId, WidgetText};
+use egui::{
+    emath, Button, Checkbox, DragValue, Label, RadioButton, RichText, ViewportId, WidgetText,
+};
 use egui_flex::{item, Flex};
 use glium::{Blend, Rect, Surface};
 use infinite_grid_drawer::InfiniteGridDrawer;
@@ -214,16 +216,38 @@ fn build_ui(
                     .grow_items(1.0)
                     .align_items(egui_flex::FlexAlign::Stretch)
                     .show(ui, |flex| {
-                        build_xyz_settings(
-                            flex,
-                            &mut animation_data.begin_position,
-                            RichText::new("Begin Position").size(15f32),
-                        );
-                        build_xyz_settings(
-                            flex,
-                            &mut animation_data.end_position,
-                            RichText::new("End Position").size(15f32),
-                        );
+                        flex.add_flex(item(), Flex::vertical(), |flex| {
+                            flex.add_flex(item(), Flex::horizontal(), |flex| {
+                                build_xyz_settings(
+                                    flex,
+                                    &mut animation_data.begin_position,
+                                    RichText::new("Begin Position").size(15f32),
+                                );
+                                build_xyz_settings(
+                                    flex,
+                                    &mut animation_data.end_position,
+                                    RichText::new("End Position").size(15f32),
+                                );
+                            });
+
+                            flex.add(
+                                item().align_self(egui_flex::FlexAlign::Start),
+                                Checkbox::new(
+                                    &mut animation_data.display_all_frames,
+                                    "Display all frames",
+                                ),
+                            );
+                            build_number_settings(
+                                flex,
+                                &mut animation_data.number_of_frames,
+                                "Number of frames",
+                            );
+                            build_number_settings(
+                                flex,
+                                &mut animation_data.animation_time,
+                                "Animation time",
+                            );
+                        });
 
                         flex.add_flex(item(), Flex::vertical(), |flex| {
                             flex.add_flex(item(), Flex::horizontal(), |flex| {
@@ -323,9 +347,9 @@ fn build_wxyz_settings(
     });
 }
 
-fn build_number_settings(
+fn build_number_settings<Num: emath::Numeric>(
     flex: &mut egui_flex::FlexInstance<'_>,
-    num: &mut f32,
+    num: &mut Num,
     name: impl Into<WidgetText>,
 ) {
     flex.add_flex(item(), Flex::horizontal(), |flex| {
