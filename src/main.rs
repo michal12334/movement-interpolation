@@ -70,24 +70,46 @@ fn main() {
             previous_time = current_time;
 
             egui_glium.run(&window, |egui_ctx| {
-                egui::Window::new("panel").show(egui_ctx, |ui| {
-                    Flex::horizontal()
-                        .grow_items(1.0)
-                        .align_items(egui_flex::FlexAlign::Stretch)
-                        .show(ui, |flex| {
-                            build_position_settings(
-                                flex,
-                                &mut animation_data.begin_position,
-                                RichText::new("Begin Position").size(15f32),
-                            );
-                            build_position_settings(
-                                flex,
-                                &mut animation_data.end_position,
-                                RichText::new("End Position").size(15f32),
-                            );
-                        });
-                    ui.label(RichText::new(format!("FPS: {:.1}", fps)).size(15f32));
-                });
+                egui::Window::new("panel")
+                    .auto_sized()
+                    .show(egui_ctx, |ui| {
+                        Flex::horizontal()
+                            .grow_items(1.0)
+                            .align_items(egui_flex::FlexAlign::Stretch)
+                            .show(ui, |flex| {
+                                build_xyz_settings(
+                                    flex,
+                                    &mut animation_data.begin_position,
+                                    RichText::new("Begin Position").size(15f32),
+                                );
+                                build_xyz_settings(
+                                    flex,
+                                    &mut animation_data.end_position,
+                                    RichText::new("End Position").size(15f32),
+                                );
+                                build_wxyz_settings(
+                                    flex,
+                                    &mut animation_data.begin_rotation_quaternion,
+                                    RichText::new("Begin Quternion").size(15f32),
+                                );
+                                build_wxyz_settings(
+                                    flex,
+                                    &mut animation_data.end_rotation_quaternion,
+                                    RichText::new("End Quternion").size(15f32),
+                                );
+                                build_xyz_settings(
+                                    flex,
+                                    &mut animation_data.begin_rotation_xyz,
+                                    RichText::new("Begin Euler Angle").size(15f32),
+                                );
+                                build_xyz_settings(
+                                    flex,
+                                    &mut animation_data.end_rotation_xyz,
+                                    RichText::new("End Euler Angle").size(15f32),
+                                );
+                            });
+                        ui.label(RichText::new(format!("FPS: {:.1}", fps)).size(15f32));
+                    });
             });
 
             window.request_redraw();
@@ -219,24 +241,31 @@ fn main() {
     });
 }
 
-fn build_position_settings(
+fn build_xyz_settings(
     flex: &mut egui_flex::FlexInstance<'_>,
     postion: &mut (f32, f32, f32),
     title: impl Into<WidgetText>,
 ) {
-    flex.add_flex(
-        item().grow(1.0),
-        Flex::vertical().align_items(egui_flex::FlexAlign::Stretch),
-        |flex| {
-            flex.add(
-                item().align_self(egui_flex::FlexAlign::Stretch).grow(1.0),
-                Label::new(title).extend(),
-            );
-            build_number_settings(flex, &mut postion.0, "X");
-            build_number_settings(flex, &mut postion.1, "Y");
-            build_number_settings(flex, &mut postion.2, "Z");
-        },
-    );
+    flex.add_flex(item(), Flex::vertical(), |flex| {
+        flex.add(item(), Label::new(title).extend());
+        build_number_settings(flex, &mut postion.0, "X");
+        build_number_settings(flex, &mut postion.1, "Y");
+        build_number_settings(flex, &mut postion.2, "Z");
+    });
+}
+
+fn build_wxyz_settings(
+    flex: &mut egui_flex::FlexInstance<'_>,
+    postion: &mut (f32, f32, f32, f32),
+    title: impl Into<WidgetText>,
+) {
+    flex.add_flex(item(), Flex::vertical(), |flex| {
+        flex.add(item(), Label::new(title).extend());
+        build_number_settings(flex, &mut postion.0, "W");
+        build_number_settings(flex, &mut postion.1, "X");
+        build_number_settings(flex, &mut postion.2, "Y");
+        build_number_settings(flex, &mut postion.3, "Z");
+    });
 }
 
 fn build_number_settings(
@@ -244,12 +273,8 @@ fn build_number_settings(
     num: &mut f32,
     name: impl Into<WidgetText>,
 ) {
-    flex.add_flex(
-        item().grow(1.0).align_self(egui_flex::FlexAlign::Stretch),
-        Flex::horizontal().align_items(egui_flex::FlexAlign::Stretch),
-        |flex| {
-            flex.add(item().grow(1.0), DragValue::new(num));
-            flex.add(item(), Label::new(name).extend());
-        },
-    );
+    flex.add_flex(item(), Flex::horizontal(), |flex| {
+        flex.add(item().grow(1.0), DragValue::new(num));
+        flex.add(item(), Label::new(name).extend());
+    });
 }
