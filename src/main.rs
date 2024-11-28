@@ -1,6 +1,10 @@
+mod infinite_grid_drawer;
+mod vertex;
+
 use chrono::Local;
 use egui::ViewportId;
-use glium::Surface;
+use glium::{Blend, Surface};
+use infinite_grid_drawer::InfiniteGridDrawer;
 use nalgebra::{Matrix4, Point3, Vector3, Vector4};
 use winit::event::{self, ElementState, MouseButton};
 
@@ -16,6 +20,17 @@ fn main() {
 
     let mut egui_glium =
         egui_glium::EguiGlium::new(ViewportId::ROOT, &display, &window, &event_loop);
+
+    let drawing_parameters = glium::DrawParameters {
+        depth: glium::Depth {
+            test: glium::draw_parameters::DepthTest::IfLess,
+            write: true,
+            ..Default::default()
+        },
+        backface_culling: glium::draw_parameters::BackfaceCullingMode::CullClockwise,
+        blend: Blend::alpha_blending(),
+        ..Default::default()
+    };
 
     let mut perspective = Matrix4::new_perspective(
         width as f32 / height as f32,
@@ -35,6 +50,8 @@ fn main() {
         &camera_up,
     );
     let mut camera_move_button_pressed = false;
+
+    let infinite_grid_drawer = InfiniteGridDrawer::new(&display);
 
     let mut previous_time = Local::now();
 
@@ -57,6 +74,8 @@ fn main() {
             let mut target = display.draw();
 
             target.clear_color_and_depth((0.0, 0.0, 0.0, 1.0), 1.0);
+
+            infinite_grid_drawer.draw(&mut target, &perspective, &view, &drawing_parameters);
 
             egui_glium.paint(&display, &mut target);
 
