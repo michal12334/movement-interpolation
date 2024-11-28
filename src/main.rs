@@ -1,8 +1,11 @@
+mod animation_data;
 mod infinite_grid_drawer;
 mod vertex;
 
+use animation_data::AnimationData;
 use chrono::Local;
-use egui::ViewportId;
+use egui::{DragValue, Label, RichText, ViewportId, WidgetText};
+use egui_flex::{item, Flex};
 use glium::{Blend, Rect, Surface};
 use infinite_grid_drawer::InfiniteGridDrawer;
 use nalgebra::{Matrix4, Point3, Vector3, Vector4};
@@ -53,6 +56,8 @@ fn main() {
 
     let infinite_grid_drawer = InfiniteGridDrawer::new(&display);
 
+    let mut animation_data = AnimationData::default();
+
     let mut previous_time = Local::now();
 
     #[allow(deprecated)]
@@ -66,7 +71,22 @@ fn main() {
 
             egui_glium.run(&window, |egui_ctx| {
                 egui::Window::new("panel").show(egui_ctx, |ui| {
-                    ui.label(format!("FPS: {:.1}", fps));
+                    Flex::horizontal()
+                        .grow_items(1.0)
+                        .align_items(egui_flex::FlexAlign::Stretch)
+                        .show(ui, |flex| {
+                            build_position_settings(
+                                flex,
+                                &mut animation_data.begin_position,
+                                RichText::new("Begin Position").size(15f32),
+                            );
+                            build_position_settings(
+                                flex,
+                                &mut animation_data.end_position,
+                                RichText::new("End Position").size(15f32),
+                            );
+                        });
+                    ui.label(RichText::new(format!("FPS: {:.1}", fps)).size(15f32));
                 });
             });
 
@@ -197,4 +217,39 @@ fn main() {
             _ => (),
         }
     });
+}
+
+fn build_position_settings(
+    flex: &mut egui_flex::FlexInstance<'_>,
+    postion: &mut (f32, f32, f32),
+    title: impl Into<WidgetText>,
+) {
+    flex.add_flex(
+        item().grow(1.0),
+        Flex::vertical().align_items(egui_flex::FlexAlign::Stretch),
+        |flex| {
+            flex.add(
+                item().align_self(egui_flex::FlexAlign::Stretch).grow(1.0),
+                Label::new(title).extend(),
+            );
+            build_number_settings(flex, &mut postion.0, "X");
+            build_number_settings(flex, &mut postion.1, "Y");
+            build_number_settings(flex, &mut postion.2, "Z");
+        },
+    );
+}
+
+fn build_number_settings(
+    flex: &mut egui_flex::FlexInstance<'_>,
+    num: &mut f32,
+    name: impl Into<WidgetText>,
+) {
+    flex.add_flex(
+        item().grow(1.0).align_self(egui_flex::FlexAlign::Stretch),
+        Flex::horizontal().align_items(egui_flex::FlexAlign::Stretch),
+        |flex| {
+            flex.add(item().grow(1.0), DragValue::new(num));
+            flex.add(item(), Label::new(name).extend());
+        },
+    );
 }
