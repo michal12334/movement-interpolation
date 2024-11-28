@@ -69,87 +69,7 @@ fn main() {
             let fps = 1.0 / duration_in_seconds;
             previous_time = current_time;
 
-            egui_glium.run(&window, |egui_ctx| {
-                egui::Window::new("panel")
-                    .auto_sized()
-                    .show(egui_ctx, |ui| {
-                        Flex::horizontal()
-                            .grow_items(1.0)
-                            .align_items(egui_flex::FlexAlign::Stretch)
-                            .show(ui, |flex| {
-                                build_xyz_settings(
-                                    flex,
-                                    &mut animation_data.begin_position,
-                                    RichText::new("Begin Position").size(15f32),
-                                );
-                                build_xyz_settings(
-                                    flex,
-                                    &mut animation_data.end_position,
-                                    RichText::new("End Position").size(15f32),
-                                );
-
-                                flex.add_flex(item(), Flex::vertical(), |flex| {
-                                    flex.add_flex(item(), Flex::horizontal(), |flex| {
-                                        build_wxyz_settings(
-                                            flex,
-                                            &mut animation_data.begin_rotation_quaternion,
-                                            RichText::new("Begin Quternion").size(15f32),
-                                        );
-                                        build_wxyz_settings(
-                                            flex,
-                                            &mut animation_data.end_rotation_quaternion,
-                                            RichText::new("End Quternion").size(15f32),
-                                        );
-                                    });
-
-                                    if flex
-                                        .add(
-                                            item().align_self(egui_flex::FlexAlign::Start),
-                                            RadioButton::new(
-                                                animation_data.quternion_interpolation_type
-                                                    == QuternionInterpolationType::Linear,
-                                                "Linear",
-                                            ),
-                                        )
-                                        .inner
-                                        .clicked()
-                                    {
-                                        animation_data.quternion_interpolation_type =
-                                            QuternionInterpolationType::Linear;
-                                    }
-
-                                    if flex
-                                        .add(
-                                            item().align_self(egui_flex::FlexAlign::Start),
-                                            RadioButton::new(
-                                                animation_data.quternion_interpolation_type
-                                                    == QuternionInterpolationType::Spherical,
-                                                "Spherical",
-                                            ),
-                                        )
-                                        .inner
-                                        .clicked()
-                                    {
-                                        animation_data.quternion_interpolation_type =
-                                            QuternionInterpolationType::Spherical;
-                                    }
-
-                                    flex.add(item(), Button::new("run"));
-                                });
-                                build_xyz_settings(
-                                    flex,
-                                    &mut animation_data.begin_rotation_xyz,
-                                    RichText::new("Begin Euler Angle").size(15f32),
-                                );
-                                build_xyz_settings(
-                                    flex,
-                                    &mut animation_data.end_rotation_xyz,
-                                    RichText::new("End Euler Angle").size(15f32),
-                                );
-                            });
-                        ui.label(RichText::new(format!("FPS: {:.1}", fps)).size(15f32));
-                    });
-            });
+            build_ui(&mut egui_glium, &window, &mut animation_data, fps);
 
             window.request_redraw();
 
@@ -277,6 +197,90 @@ fn main() {
             }
             _ => (),
         }
+    });
+}
+
+fn build_ui(egui_glium: &mut egui_glium::EguiGlium, window: &winit::window::Window, animation_data: &mut AnimationData, fps: f64) {
+    egui_glium.run(window, |egui_ctx| {
+        egui::Window::new("panel")
+            .auto_sized()
+            .show(egui_ctx, |ui| {
+                Flex::horizontal()
+                    .grow_items(1.0)
+                    .align_items(egui_flex::FlexAlign::Stretch)
+                    .show(ui, |flex| {
+                        build_xyz_settings(
+                            flex,
+                            &mut animation_data.begin_position,
+                            RichText::new("Begin Position").size(15f32),
+                        );
+                        build_xyz_settings(
+                            flex,
+                            &mut animation_data.end_position,
+                            RichText::new("End Position").size(15f32),
+                        );
+
+                        flex.add_flex(item(), Flex::vertical(), |flex| {
+                            flex.add_flex(item(), Flex::horizontal(), |flex| {
+                                build_wxyz_settings(
+                                    flex,
+                                    &mut animation_data.begin_rotation_quaternion,
+                                    RichText::new("Begin Quternion").size(15f32),
+                                );
+                                build_wxyz_settings(
+                                    flex,
+                                    &mut animation_data.end_rotation_quaternion,
+                                    RichText::new("End Quternion").size(15f32),
+                                );
+                            });
+
+                            if flex
+                                .add(
+                                    item().align_self(egui_flex::FlexAlign::Start),
+                                    RadioButton::new(
+                                        animation_data.quternion_interpolation_type
+                                            == QuternionInterpolationType::Linear,
+                                        "Linear",
+                                    ),
+                                )
+                                .inner
+                                .clicked()
+                            {
+                                animation_data.quternion_interpolation_type =
+                                    QuternionInterpolationType::Linear;
+                            }
+
+                            if flex
+                                .add(
+                                    item().align_self(egui_flex::FlexAlign::Start),
+                                    RadioButton::new(
+                                        animation_data.quternion_interpolation_type
+                                            == QuternionInterpolationType::Spherical,
+                                        "Spherical",
+                                    ),
+                                )
+                                .inner
+                                .clicked()
+                            {
+                                animation_data.quternion_interpolation_type =
+                                    QuternionInterpolationType::Spherical;
+                            }
+
+                            flex.add(item(), Button::new("run"));
+                        });
+                        build_xyz_settings(
+                            flex,
+                            &mut animation_data.begin_rotation_xyz,
+                            RichText::new("Begin Euler Angle").size(15f32),
+                        );
+                        build_xyz_settings(
+                            flex,
+                            &mut animation_data.end_rotation_xyz,
+                            RichText::new("End Euler Angle").size(15f32),
+                        );
+                    });
+                ui.label(RichText::new(format!("FPS: {:.1}", fps)).size(15f32));
+            });
     });
 }
 
