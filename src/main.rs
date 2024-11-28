@@ -3,7 +3,7 @@ mod vertex;
 
 use chrono::Local;
 use egui::ViewportId;
-use glium::{Blend, Surface};
+use glium::{Blend, Rect, Surface};
 use infinite_grid_drawer::InfiniteGridDrawer;
 use nalgebra::{Matrix4, Point3, Vector3, Vector4};
 use winit::event::{self, ElementState, MouseButton};
@@ -21,7 +21,7 @@ fn main() {
     let mut egui_glium =
         egui_glium::EguiGlium::new(ViewportId::ROOT, &display, &window, &event_loop);
 
-    let drawing_parameters = glium::DrawParameters {
+    let mut drawing_parameters = glium::DrawParameters {
         depth: glium::Depth {
             test: glium::draw_parameters::DepthTest::IfLess,
             write: true,
@@ -74,6 +74,12 @@ fn main() {
             let mut target = display.draw();
 
             target.clear_color_and_depth((0.0, 0.0, 0.0, 1.0), 1.0);
+
+            drawing_parameters.viewport = Some(Rect { left: 0, bottom: 0, width: width / 2, height: height });
+
+            infinite_grid_drawer.draw(&mut target, &perspective, &view, &drawing_parameters);
+
+            drawing_parameters.viewport = Some(Rect { left: width / 2, bottom: 0, width: width / 2, height: height });
 
             infinite_grid_drawer.draw(&mut target, &perspective, &view, &drawing_parameters);
 
