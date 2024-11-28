@@ -12,7 +12,7 @@ fn main() {
     let mut width = 1600;
     let mut height = 1200;
 
-    let event_loop = winit::event_loop::EventLoopBuilder::new().build().unwrap();
+    let event_loop = winit::event_loop::EventLoop::builder().build().unwrap();
     let (window, display) = glium::backend::glutin::SimpleWindowBuilder::new()
         .with_title("Movement interpolation")
         .with_inner_size(width, height)
@@ -55,6 +55,7 @@ fn main() {
 
     let mut previous_time = Local::now();
 
+    #[allow(deprecated)]
     let _ = event_loop.run(move |event, window_target| {
         let mut redraw = || {
             let current_time = Local::now();
@@ -163,7 +164,7 @@ fn main() {
                         }
                         _ => {}
                     },
-                    WindowEvent::TouchpadMagnify { delta, .. } => {
+                    WindowEvent::PinchGesture { delta, .. } => {
                         camera_distant -= *delta as f32 * 3.0;
                         view = Matrix4::look_at_rh(
                             &Point3::from_slice((-camera_distant * camera_direction).as_slice()),
