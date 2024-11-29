@@ -42,7 +42,7 @@ fn main() {
     };
 
     let mut perspective = Matrix4::new_perspective(
-        width as f32 / height as f32,
+        (width / 2) as f32 / height as f32,
         std::f32::consts::PI / 2.0,
         0.1,
         100.0,
@@ -130,7 +130,7 @@ fn main() {
                     WindowEvent::Resized(new_size) => {
                         display.resize((*new_size).into());
                         perspective = Matrix4::new_perspective(
-                            new_size.width as f32 / new_size.height as f32,
+                            (new_size.width / 2) as f32 / new_size.height as f32,
                             std::f32::consts::PI / 2.0,
                             0.1,
                             100.0,
