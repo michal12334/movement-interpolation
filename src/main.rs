@@ -1,10 +1,12 @@
 mod animation_data;
 mod block;
+mod block_drawer;
 mod infinite_grid_drawer;
 mod vertex;
 
 use animation_data::{AnimationData, QuternionInterpolationType};
 use block::Block;
+use block_drawer::BlockDrawer;
 use chrono::Local;
 use egui::{
     emath, Button, Checkbox, DragValue, Label, RadioButton, RichText, ViewportId, WidgetText,
@@ -63,6 +65,7 @@ fn main() {
     let mut animation_data = AnimationData::default();
 
     let block = Block::generate(10, &display);
+    let block_drawer = BlockDrawer::new(&display);
 
     let mut previous_time = Local::now();
 
@@ -89,6 +92,16 @@ fn main() {
                 width: width / 2,
                 height: height,
             });
+
+            block_drawer.draw(
+                &mut target,
+                &perspective,
+                &view,
+                &Matrix4::identity(),
+                -camera_distant * camera_direction,
+                &block,
+                &drawing_parameters,
+            );
 
             infinite_grid_drawer.draw(&mut target, &perspective, &view, &drawing_parameters);
 
