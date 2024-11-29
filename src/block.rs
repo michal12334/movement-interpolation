@@ -23,7 +23,7 @@ impl Block {
             let a = (i as f32 / (divisions_count - 1) as f32) * 2f32 * PI;
             let x = a.cos();
             let y = a.sin();
-            let normal = [0f32, 0f32, -1f32];
+            let normal = [0f32, 0f32, 1f32];
             let position = [radius * x, radius * y, 0f32];
             let color = [0f32, 0f32, 1f32];
             vertices.push(Vertex::new(position, normal, color));
@@ -34,7 +34,7 @@ impl Block {
         }
         vertices.push(Vertex::new(
             [0f32, 0f32, 0f32],
-            [0f32, 0f32, -1f32],
+            [0f32, 0f32, 1f32],
             [0f32, 0f32, 1f32],
         ));
 
@@ -48,8 +48,8 @@ impl Block {
             vertices.push(Vertex::new(position, normal, color));
 
             indices.push(divisions_count + 1 + i);
-            indices.push(divisions_count + 1 + (i + 1) % divisions_count);
             indices.push(2 * divisions_count + 1 + i);
+            indices.push(divisions_count + 1 + (i + 1) % divisions_count);
 
             indices.push(divisions_count + 1 + (i + 1) % divisions_count);
             indices.push(2 * divisions_count + 1 + i);
@@ -60,18 +60,18 @@ impl Block {
             let a = (i as f32 / (divisions_count - 1) as f32) * 2f32 * PI;
             let x = a.cos();
             let y = a.sin();
-            let z = len;
+            let z = -len;
             let normal = [x, y, 0f32];
             let position = [radius * x, radius * y, z];
             let color = [0f32, 0f32, 1f32];
             vertices.push(Vertex::new(position, normal, color));
 
             indices.push(2 * divisions_count + 1 + i);
-            indices.push(2 * divisions_count + 1 + (i + 1) % divisions_count);
             indices.push(3 * divisions_count + 1);
+            indices.push(2 * divisions_count + 1 + (i + 1) % divisions_count);
         }
         vertices.push(Vertex::new(
-            [0f32, 0f32, len + radius],
+            [0f32, 0f32, -len - radius],
             [0f32, 0f32, 1f32],
             [0f32, 0f32, 1f32],
         ));
