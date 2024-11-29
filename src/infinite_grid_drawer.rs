@@ -3,11 +3,11 @@ use glium::{uniform, Display, DrawParameters, IndexBuffer, Program, Surface, Ver
 
 use nalgebra::Matrix4;
 
-use crate::vertex::Vertex;
+use crate::vertex::SimpleVertex;
 
 pub struct InfiniteGridDrawer {
     program: Program,
-    vertex_buffer: VertexBuffer<Vertex>,
+    vertex_buffer: VertexBuffer<SimpleVertex>,
     index_buffer: IndexBuffer<u16>,
 }
 
@@ -102,10 +102,10 @@ impl InfiniteGridDrawer {
             vertex_buffer: VertexBuffer::new(
                 display,
                 &[
-                    Vertex::new([1.0, 1.0, 0.0]),
-                    Vertex::new([1.0, -1.0, 0.0]),
-                    Vertex::new([-1.0, -1.0, 0.0]),
-                    Vertex::new([-1.0, 1.0, 0.0]),
+                    SimpleVertex::new([1.0, 1.0, 0.0]),
+                    SimpleVertex::new([1.0, -1.0, 0.0]),
+                    SimpleVertex::new([-1.0, -1.0, 0.0]),
+                    SimpleVertex::new([-1.0, 1.0, 0.0]),
                 ],
             )
             .unwrap(),
