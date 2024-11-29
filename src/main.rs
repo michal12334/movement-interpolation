@@ -112,6 +112,16 @@ fn main() {
                 height: height,
             });
 
+            block_drawer.draw(
+                &mut target,
+                &perspective,
+                &view,
+                &Matrix4::identity(),
+                -camera_distant * camera_direction,
+                &block,
+                &drawing_parameters,
+            );
+
             infinite_grid_drawer.draw(&mut target, &perspective, &view, &drawing_parameters);
 
             egui_glium.paint(&display, &mut target);
