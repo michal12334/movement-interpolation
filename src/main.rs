@@ -5,7 +5,9 @@ mod block_drawer;
 mod infinite_grid_drawer;
 mod vertex;
 
-use animation::{Animation, ContinuousAnimationBuilder, DiscreteFrameAnimationBuilder};
+use animation::{
+    Animation, AnimationAngle, ContinuousAnimationBuilder, DiscreteFrameAnimationBuilder,
+};
 use animation_data::{AnimationData, QuternionInterpolationType};
 use block::Block;
 use block_drawer::BlockDrawer;
@@ -16,7 +18,7 @@ use egui::{
 use egui_flex::{item, Flex};
 use glium::{Blend, Rect, Surface};
 use infinite_grid_drawer::InfiniteGridDrawer;
-use nalgebra::{Matrix4, Point3, Vector3, Vector4};
+use nalgebra::{Matrix4, Point3, Quaternion, Vector3, Vector4};
 use winit::event::{self, ElementState, MouseButton};
 
 fn main() {
@@ -107,7 +109,7 @@ fn main() {
 
                 a.make_step(duration_in_seconds);
 
-                for model in a.get_frames() {
+                for model in a.get_quaternion_frames() {
                     block_drawer.draw(
                         &mut target,
                         &perspective,
@@ -144,7 +146,7 @@ fn main() {
             if animation.is_some() {
                 let a = animation.take().unwrap();
 
-                for model in a.get_frames() {
+                for model in a.get_euler_frames() {
                     block_drawer.draw(
                         &mut target,
                         &perspective,
@@ -384,6 +386,20 @@ fn build_ui(
                                             animation_data.end_position.1,
                                             animation_data.end_position.2,
                                         ))
+                                        .begin_angle(AnimationAngle::new_quternion(
+                                            Quaternion::new(
+                                                animation_data.begin_rotation_quaternion.0,
+                                                animation_data.begin_rotation_quaternion.1,
+                                                animation_data.begin_rotation_quaternion.2,
+                                                animation_data.begin_rotation_quaternion.3,
+                                            ),
+                                        ))
+                                        .end_angle(AnimationAngle::new_quternion(Quaternion::new(
+                                            animation_data.end_rotation_quaternion.0,
+                                            animation_data.end_rotation_quaternion.1,
+                                            animation_data.end_rotation_quaternion.2,
+                                            animation_data.begin_rotation_quaternion.3,
+                                        )))
                                         .build()
                                         .unwrap();
                                     *animation = Some(Box::new(a));
@@ -400,6 +416,20 @@ fn build_ui(
                                             animation_data.end_position.1,
                                             animation_data.end_position.2,
                                         ))
+                                        .begin_angle(AnimationAngle::new_quternion(
+                                            Quaternion::new(
+                                                animation_data.begin_rotation_quaternion.0,
+                                                animation_data.begin_rotation_quaternion.1,
+                                                animation_data.begin_rotation_quaternion.2,
+                                                animation_data.begin_rotation_quaternion.3,
+                                            ),
+                                        ))
+                                        .end_angle(AnimationAngle::new_quternion(Quaternion::new(
+                                            animation_data.end_rotation_quaternion.0,
+                                            animation_data.end_rotation_quaternion.1,
+                                            animation_data.end_rotation_quaternion.2,
+                                            animation_data.end_rotation_quaternion.3,
+                                        )))
                                         .build()
                                         .unwrap();
                                     *animation = Some(Box::new(a));
