@@ -5,6 +5,8 @@ mod block_drawer;
 mod infinite_grid_drawer;
 mod vertex;
 
+use std::f32::consts::PI;
+
 use animation::{
     Animation, AnimationAngle, ContinuousAnimationBuilder, DiscreteFrameAnimationBuilder,
 };
@@ -451,7 +453,61 @@ fn build_ui(
                                 );
                             });
 
-                            flex.add(item(), Button::new("run"));
+                            if flex.add(item(), Button::new("run")).inner.clicked() {
+                                if animation_data.display_all_frames {
+                                    let a = DiscreteFrameAnimationBuilder::default()
+                                        .frames_count(animation_data.frames_count)
+                                        .begin_position(Vector3::new(
+                                            animation_data.begin_position.0,
+                                            animation_data.begin_position.1,
+                                            animation_data.begin_position.2,
+                                        ))
+                                        .end_position(Vector3::new(
+                                            animation_data.end_position.0,
+                                            animation_data.end_position.1,
+                                            animation_data.end_position.2,
+                                        ))
+                                        .begin_angle(AnimationAngle::new_euler(Vector3::new(
+                                            animation_data.begin_rotation_xyz.0 / 180f32 * PI,
+                                            animation_data.begin_rotation_xyz.1 / 180f32 * PI,
+                                            animation_data.begin_rotation_xyz.2 / 180f32 * PI,
+                                        )))
+                                        .end_angle(AnimationAngle::new_euler(Vector3::new(
+                                            animation_data.end_rotation_xyz.0 / 180f32 * PI,
+                                            animation_data.end_rotation_xyz.1 / 180f32 * PI,
+                                            animation_data.end_rotation_xyz.2 / 180f32 * PI,
+                                        )))
+                                        .build()
+                                        .unwrap();
+                                    *animation = Some(Box::new(a));
+                                } else {
+                                    let a = ContinuousAnimationBuilder::default()
+                                        .animation_time(animation_data.animation_time)
+                                        .begin_position(Vector3::new(
+                                            animation_data.begin_position.0,
+                                            animation_data.begin_position.1,
+                                            animation_data.begin_position.2,
+                                        ))
+                                        .end_position(Vector3::new(
+                                            animation_data.end_position.0,
+                                            animation_data.end_position.1,
+                                            animation_data.end_position.2,
+                                        ))
+                                        .begin_angle(AnimationAngle::new_euler(Vector3::new(
+                                            animation_data.begin_rotation_xyz.0 / 180f32 * PI,
+                                            animation_data.begin_rotation_xyz.1 / 180f32 * PI,
+                                            animation_data.begin_rotation_xyz.2 / 180f32 * PI,
+                                        )))
+                                        .end_angle(AnimationAngle::new_euler(Vector3::new(
+                                            animation_data.end_rotation_xyz.0 / 180f32 * PI,
+                                            animation_data.end_rotation_xyz.1 / 180f32 * PI,
+                                            animation_data.end_rotation_xyz.2 / 180f32 * PI,
+                                        )))
+                                        .build()
+                                        .unwrap();
+                                    *animation = Some(Box::new(a));
+                                }
+                            }
                         });
                     });
                 ui.label(RichText::new(format!("FPS: {:.1}", fps)).size(15f32));
