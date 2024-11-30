@@ -5,7 +5,7 @@ use nalgebra::{Matrix4, Vector3};
 
 pub trait Animation {
     fn get_frames(&self) -> Vec<Matrix4<f32>>;
-    fn make_step(&mut self);
+    fn make_step(&mut self, time_elapsed: f64);
 }
 
 #[derive(Debug, Clone, Getters, new, Builder)]
@@ -19,14 +19,22 @@ pub struct DiscreteFrameAnimation {
     frames: Option<Vec<Matrix4<f32>>>,
 }
 
-pub struct ContinuousAnimation {}
+#[derive(Debug, Clone, Getters, new, Builder)]
+pub struct ContinuousAnimation {
+    begin_position: Vector3<f32>,
+    end_position: Vector3<f32>,
+    animation_time: f64,
+
+    #[builder(setter(skip))]
+    time_elapsed: f64,
+}
 
 impl Animation for DiscreteFrameAnimation {
     fn get_frames(&self) -> Vec<Matrix4<f32>> {
         self.frames.clone().unwrap()
     }
 
-    fn make_step(&mut self) {
+    fn make_step(&mut self, _time_elapsed: f64) {
         if self.frames.is_some() {
             return;
         }
@@ -40,6 +48,22 @@ impl Animation for DiscreteFrameAnimation {
                 })
                 .collect(),
         );
+    }
+}
+
+impl Animation for ContinuousAnimation {
+    fn get_frames(&self) -> Vec<Matrix4<f32>> {
+        let x = (self.time_elapsed / self.animation_time) as f32;
+        let t = (1f32 - x) * self.begin_position + x * self.end_position;
+        vec![Matrix4::new_translation(&t)]
+    }
+
+    fn make_step(&mut self, time_elapsed: f64) {
+        self.time_elapsed += time_elapsed;
+
+        if self.time_elapsed >= self.animation_time {
+            self.time_elapsed = self.animation_time;
+        }
     }
 }
 

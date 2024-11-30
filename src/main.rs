@@ -5,7 +5,7 @@ mod block_drawer;
 mod infinite_grid_drawer;
 mod vertex;
 
-use animation::{Animation, DiscreteFrameAnimation, DiscreteFrameAnimationBuilder};
+use animation::{Animation, ContinuousAnimationBuilder, DiscreteFrameAnimationBuilder};
 use animation_data::{AnimationData, QuternionInterpolationType};
 use block::Block;
 use block_drawer::BlockDrawer;
@@ -105,7 +105,7 @@ fn main() {
             if animation.is_some() {
                 let mut a = animation.take().unwrap();
 
-                a.make_step();
+                a.make_step(duration_in_seconds);
 
                 for model in a.get_frames() {
                     block_drawer.draw(
@@ -142,9 +142,7 @@ fn main() {
             });
 
             if animation.is_some() {
-                let mut a = animation.take().unwrap();
-
-                a.make_step();
+                let a = animation.take().unwrap();
 
                 for model in a.get_frames() {
                     block_drawer.draw(
@@ -373,21 +371,39 @@ fn build_ui(
                             }
 
                             if flex.add(item(), Button::new("run")).inner.clicked() {
-                                let a = DiscreteFrameAnimationBuilder::default()
-                                    .frames_count(animation_data.frames_count)
-                                    .begin_position(Vector3::new(
-                                        animation_data.begin_position.0,
-                                        animation_data.begin_position.1,
-                                        animation_data.begin_position.2,
-                                    ))
-                                    .end_position(Vector3::new(
-                                        animation_data.end_position.0,
-                                        animation_data.end_position.1,
-                                        animation_data.end_position.2,
-                                    ))
-                                    .build()
-                                    .unwrap();
-                                *animation = Some(Box::new(a));
+                                if animation_data.display_all_frames {
+                                    let a = DiscreteFrameAnimationBuilder::default()
+                                        .frames_count(animation_data.frames_count)
+                                        .begin_position(Vector3::new(
+                                            animation_data.begin_position.0,
+                                            animation_data.begin_position.1,
+                                            animation_data.begin_position.2,
+                                        ))
+                                        .end_position(Vector3::new(
+                                            animation_data.end_position.0,
+                                            animation_data.end_position.1,
+                                            animation_data.end_position.2,
+                                        ))
+                                        .build()
+                                        .unwrap();
+                                    *animation = Some(Box::new(a));
+                                } else {
+                                    let a = ContinuousAnimationBuilder::default()
+                                        .animation_time(animation_data.animation_time)
+                                        .begin_position(Vector3::new(
+                                            animation_data.begin_position.0,
+                                            animation_data.begin_position.1,
+                                            animation_data.begin_position.2,
+                                        ))
+                                        .end_position(Vector3::new(
+                                            animation_data.end_position.0,
+                                            animation_data.end_position.1,
+                                            animation_data.end_position.2,
+                                        ))
+                                        .build()
+                                        .unwrap();
+                                    *animation = Some(Box::new(a));
+                                }
                             }
                         });
 
