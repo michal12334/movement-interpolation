@@ -1,9 +1,11 @@
+mod animation;
 mod animation_data;
 mod block;
 mod block_drawer;
 mod infinite_grid_drawer;
 mod vertex;
 
+use animation::{Animation, DiscreteFrameAnimation, DiscreteFrameAnimationBuilder};
 use animation_data::{AnimationData, QuternionInterpolationType};
 use block::Block;
 use block_drawer::BlockDrawer;
@@ -63,6 +65,7 @@ fn main() {
     let infinite_grid_drawer = InfiniteGridDrawer::new(&display);
 
     let mut animation_data = AnimationData::default();
+    let mut animation: Option<Box<dyn Animation>> = None;
 
     let block = Block::generate(10, &display);
     let block_drawer = BlockDrawer::new(&display);
@@ -78,7 +81,13 @@ fn main() {
             let fps = 1.0 / duration_in_seconds;
             previous_time = current_time;
 
-            build_ui(&mut egui_glium, &window, &mut animation_data, fps);
+            build_ui(
+                &mut egui_glium,
+                &window,
+                &mut animation_data,
+                &mut animation,
+                fps,
+            );
 
             window.request_redraw();
 
@@ -93,15 +102,35 @@ fn main() {
                 height: height,
             });
 
-            block_drawer.draw(
-                &mut target,
-                &perspective,
-                &view,
-                &Matrix4::identity(),
-                -camera_distant * camera_direction,
-                &block,
-                &drawing_parameters,
-            );
+            if animation.is_some() {
+                let mut a = animation.take().unwrap();
+
+                a.make_step();
+
+                for model in a.get_frames() {
+                    block_drawer.draw(
+                        &mut target,
+                        &perspective,
+                        &view,
+                        &model,
+                        -camera_distant * camera_direction,
+                        &block,
+                        &drawing_parameters,
+                    );
+                }
+
+                animation = Some(a);
+            } else {
+                block_drawer.draw(
+                    &mut target,
+                    &perspective,
+                    &view,
+                    &Matrix4::identity(),
+                    -camera_distant * camera_direction,
+                    &block,
+                    &drawing_parameters,
+                );
+            }
 
             infinite_grid_drawer.draw(&mut target, &perspective, &view, &drawing_parameters);
 
@@ -112,15 +141,35 @@ fn main() {
                 height: height,
             });
 
-            block_drawer.draw(
-                &mut target,
-                &perspective,
-                &view,
-                &Matrix4::identity(),
-                -camera_distant * camera_direction,
-                &block,
-                &drawing_parameters,
-            );
+            if animation.is_some() {
+                let mut a = animation.take().unwrap();
+
+                a.make_step();
+
+                for model in a.get_frames() {
+                    block_drawer.draw(
+                        &mut target,
+                        &perspective,
+                        &view,
+                        &model,
+                        -camera_distant * camera_direction,
+                        &block,
+                        &drawing_parameters,
+                    );
+                }
+
+                animation = Some(a);
+            } else {
+                block_drawer.draw(
+                    &mut target,
+                    &perspective,
+                    &view,
+                    &Matrix4::identity(),
+                    -camera_distant * camera_direction,
+                    &block,
+                    &drawing_parameters,
+                );
+            }
 
             infinite_grid_drawer.draw(&mut target, &perspective, &view, &drawing_parameters);
 
@@ -233,6 +282,7 @@ fn build_ui(
     egui_glium: &mut egui_glium::EguiGlium,
     window: &winit::window::Window,
     animation_data: &mut AnimationData,
+    animation: &mut Option<Box<dyn Animation>>,
     fps: f64,
 ) {
     egui_glium.run(window, |egui_ctx| {
@@ -266,7 +316,7 @@ fn build_ui(
                             );
                             build_number_settings(
                                 flex,
-                                &mut animation_data.number_of_frames,
+                                &mut animation_data.frames_count,
                                 "Number of frames",
                             );
                             build_number_settings(
@@ -322,7 +372,23 @@ fn build_ui(
                                     QuternionInterpolationType::Spherical;
                             }
 
-                            flex.add(item(), Button::new("run"));
+                            if flex.add(item(), Button::new("run")).inner.clicked() {
+                                let a = DiscreteFrameAnimationBuilder::default()
+                                    .frames_count(animation_data.frames_count)
+                                    .begin_position(Vector3::new(
+                                        animation_data.begin_position.0,
+                                        animation_data.begin_position.1,
+                                        animation_data.begin_position.2,
+                                    ))
+                                    .end_position(Vector3::new(
+                                        animation_data.end_position.0,
+                                        animation_data.end_position.1,
+                                        animation_data.end_position.2,
+                                    ))
+                                    .build()
+                                    .unwrap();
+                                *animation = Some(Box::new(a));
+                            }
                         });
 
                         flex.add_flex(item(), Flex::vertical(), |flex| {

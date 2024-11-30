@@ -9,7 +9,7 @@ pub struct AnimationData {
     pub quternion_interpolation_type: QuternionInterpolationType,
     pub display_all_frames: bool,
     pub animation_time: f64,
-    pub number_of_frames: u8,
+    pub frames_count: u8,
 }
 
 #[derive(Debug, Clone, Default, PartialEq)]
