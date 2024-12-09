@@ -3,6 +3,8 @@ use derive_getters::Getters;
 use derive_new::new;
 use nalgebra::{Matrix4, Quaternion, Rotation3, UnitQuaternion, Vector3};
 
+use crate::animation_data::QuaternionInterpolationType;
+
 pub trait Animation {
     fn get_quaternion_frames(&self) -> Vec<Matrix4<f32>>;
     fn get_euler_frames(&self) -> Vec<Matrix4<f32>>;
@@ -23,6 +25,7 @@ pub struct DiscreteFrameAnimation {
     frames_count: u8,
     begin_angle: AnimationAngle,
     end_angle: AnimationAngle,
+    quaternion_interpolation_type: QuaternionInterpolationType,
 
     #[builder(setter(skip))]
     quaternion_frames: Option<Vec<Matrix4<f32>>>,
@@ -37,6 +40,7 @@ pub struct ContinuousAnimation {
     animation_time: f64,
     begin_angle: AnimationAngle,
     end_angle: AnimationAngle,
+    quaternion_interpolation_type: QuaternionInterpolationType,
 
     #[builder(setter(skip))]
     time_elapsed: f64,
@@ -64,12 +68,13 @@ impl Animation for DiscreteFrameAnimation {
                 .map(|f| {
                     let x = f as f32 / (self.frames_count - 1) as f32;
                     let t = (1f32 - x) * self.begin_position + x * self.end_position;
-                    let r = (1f32 - x) * begin_quaternion.quaternion()
-                        + x * end_quaternion.quaternion();
-                    Matrix4::new_translation(&t)
-                        * UnitQuaternion::from_quaternion(r)
-                            .to_rotation_matrix()
-                            .to_homogeneous()
+                    let r = get_quaternions_interpolation(
+                        &begin_quaternion,
+                        &end_quaternion,
+                        x,
+                        &self.quaternion_interpolation_type,
+                    );
+                    Matrix4::new_translation(&t) * r.to_rotation_matrix().to_homogeneous()
                 })
                 .collect(),
         );
@@ -95,13 +100,13 @@ impl Animation for ContinuousAnimation {
 
         let x = (self.time_elapsed / self.animation_time) as f32;
         let t = (1f32 - x) * self.begin_position + x * self.end_position;
-        let r = (1f32 - x) * begin_quaternion.quaternion() + x * end_quaternion.quaternion();
-        vec![
-            Matrix4::new_translation(&t)
-                * UnitQuaternion::from_quaternion(r)
-                    .to_rotation_matrix()
-                    .to_homogeneous(),
-        ]
+        let r = get_quaternions_interpolation(
+            &begin_quaternion,
+            &end_quaternion,
+            x,
+            &self.quaternion_interpolation_type,
+        );
+        vec![Matrix4::new_translation(&t) * r.to_rotation_matrix().to_homogeneous()]
     }
 
     fn get_euler_frames(&self) -> Vec<Matrix4<f32>> {
@@ -154,4 +159,26 @@ impl AnimationAngle {
             ),
         }
     }
+}
+
+fn get_quaternions_interpolation(
+    begin: &UnitQuaternion<f32>,
+    end: &UnitQuaternion<f32>,
+    t: f32,
+    interpolation_type: &QuaternionInterpolationType,
+) -> UnitQuaternion<f32> {
+    let r = match interpolation_type {
+        QuaternionInterpolationType::Linear => {
+            (1f32 - t) * begin.quaternion() + t * end.quaternion()
+        }
+        QuaternionInterpolationType::Spherical => {
+            let cos = begin.dot(&end).clamp(-1f32, 1f32);
+            let theta = cos.acos();
+            let theta_sin = theta.sin();
+            let s1 = ((1f32 - t) * theta).sin() / theta_sin;
+            let s2 = (t * theta).sin() / theta_sin;
+            s1 * begin.into_inner() + s2 * end.into_inner()
+        }
+    };
+    UnitQuaternion::from_quaternion(r)
 }

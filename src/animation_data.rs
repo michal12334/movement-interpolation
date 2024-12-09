@@ -6,14 +6,14 @@ pub struct AnimationData {
     pub end_rotation_quaternion: (f32, f32, f32, f32),
     pub begin_rotation_xyz: (f32, f32, f32),
     pub end_rotation_xyz: (f32, f32, f32),
-    pub quternion_interpolation_type: QuternionInterpolationType,
+    pub quaternion_interpolation_type: QuaternionInterpolationType,
     pub display_all_frames: bool,
     pub animation_time: f64,
     pub frames_count: u8,
 }
 
 #[derive(Debug, Clone, Default, PartialEq)]
-pub enum QuternionInterpolationType {
+pub enum QuaternionInterpolationType {
     #[default]
     Linear,
     Spherical,

@@ -10,7 +10,7 @@ use std::f32::consts::PI;
 use animation::{
     Animation, AnimationAngle, ContinuousAnimationBuilder, DiscreteFrameAnimationBuilder,
 };
-use animation_data::{AnimationData, QuternionInterpolationType};
+use animation_data::{AnimationData, QuaternionInterpolationType};
 use block::Block;
 use block_drawer::BlockDrawer;
 use chrono::Local;
@@ -346,32 +346,32 @@ fn build_ui(
                                 .add(
                                     item().align_self(egui_flex::FlexAlign::Start),
                                     RadioButton::new(
-                                        animation_data.quternion_interpolation_type
-                                            == QuternionInterpolationType::Linear,
+                                        animation_data.quaternion_interpolation_type
+                                            == QuaternionInterpolationType::Linear,
                                         "Linear",
                                     ),
                                 )
                                 .inner
                                 .clicked()
                             {
-                                animation_data.quternion_interpolation_type =
-                                    QuternionInterpolationType::Linear;
+                                animation_data.quaternion_interpolation_type =
+                                    QuaternionInterpolationType::Linear;
                             }
 
                             if flex
                                 .add(
                                     item().align_self(egui_flex::FlexAlign::Start),
                                     RadioButton::new(
-                                        animation_data.quternion_interpolation_type
-                                            == QuternionInterpolationType::Spherical,
+                                        animation_data.quaternion_interpolation_type
+                                            == QuaternionInterpolationType::Spherical,
                                         "Spherical",
                                     ),
                                 )
                                 .inner
                                 .clicked()
                             {
-                                animation_data.quternion_interpolation_type =
-                                    QuternionInterpolationType::Spherical;
+                                animation_data.quaternion_interpolation_type =
+                                    QuaternionInterpolationType::Spherical;
                             }
 
                             if flex.add(item(), Button::new("run")).inner.clicked() {
@@ -402,6 +402,9 @@ fn build_ui(
                                             animation_data.end_rotation_quaternion.2,
                                             animation_data.begin_rotation_quaternion.3,
                                         )))
+                                        .quaternion_interpolation_type(
+                                            animation_data.quaternion_interpolation_type.clone(),
+                                        )
                                         .build()
                                         .unwrap();
                                     *animation = Some(Box::new(a));
@@ -432,6 +435,9 @@ fn build_ui(
                                             animation_data.end_rotation_quaternion.2,
                                             animation_data.end_rotation_quaternion.3,
                                         )))
+                                        .quaternion_interpolation_type(
+                                            animation_data.quaternion_interpolation_type.clone(),
+                                        )
                                         .build()
                                         .unwrap();
                                     *animation = Some(Box::new(a));
@@ -477,6 +483,9 @@ fn build_ui(
                                             animation_data.end_rotation_xyz.1 / 180f32 * PI,
                                             animation_data.end_rotation_xyz.2 / 180f32 * PI,
                                         )))
+                                        .quaternion_interpolation_type(
+                                            animation_data.quaternion_interpolation_type.clone(),
+                                        )
                                         .build()
                                         .unwrap();
                                     *animation = Some(Box::new(a));
@@ -503,6 +512,9 @@ fn build_ui(
                                             animation_data.end_rotation_xyz.1 / 180f32 * PI,
                                             animation_data.end_rotation_xyz.2 / 180f32 * PI,
                                         )))
+                                        .quaternion_interpolation_type(
+                                            animation_data.quaternion_interpolation_type.clone(),
+                                        )
                                         .build()
                                         .unwrap();
                                     *animation = Some(Box::new(a));
