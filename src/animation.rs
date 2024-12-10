@@ -207,7 +207,34 @@ impl AnimationAngle {
                 UnitQuaternion::from_euler_angles(end_euler.x, end_euler.y, end_euler.z),
             )
         } else {
-            (begin_quaternion, end_quaternion)
+            let qs = [
+                UnitQuaternion::from_euler_angles(0f32, 0f32, 0f32),
+                UnitQuaternion::from_euler_angles(2f32 * PI, 0f32, 0f32),
+                UnitQuaternion::from_euler_angles(-2f32 * PI, 0f32, 0f32),
+                UnitQuaternion::from_euler_angles(0f32, 2f32 * PI, 0f32),
+                UnitQuaternion::from_euler_angles(0f32, -2f32 * PI, 0f32),
+                UnitQuaternion::from_euler_angles(0f32, 0f32, 2f32 * PI),
+                UnitQuaternion::from_euler_angles(0f32, 0f32, -2f32 * PI),
+            ];
+            qs.iter()
+                .flat_map(|f| qs.iter().map(move |g| f * g))
+                .flat_map(|f| qs.iter().map(move |g| f * g))
+                .flat_map(|a| {
+                    [
+                        (a * begin_quaternion, end_quaternion),
+                        (begin_quaternion, a * end_quaternion),
+                    ]
+                })
+                .reduce(|a, b| {
+                    if (a.0.into_inner() - a.1.into_inner()).norm_squared()
+                        < (b.0.into_inner() - b.1.into_inner()).norm_squared()
+                    {
+                        a
+                    } else {
+                        b
+                    }
+                })
+                .unwrap()
         };
 
         (begin_quaternion, begin_euler, end_quaternion, end_euler)
