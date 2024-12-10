@@ -27,7 +27,7 @@ impl BlockDrawer {
 
             void main() {
                 gl_Position = perspective * view * model * vec4(position, 1.0);
-                normal_out = normal;
+                normal_out = mat3(model) * normal;
                 color_out = color;
                 world = (model * vec4(position, 1.0)).xyz;
             }
@@ -42,7 +42,7 @@ impl BlockDrawer {
 
             out vec4 frag_color;
 
-            const vec3 light_pos = vec3(7.0, 25.0, -7.0);
+            const vec3 light_pos = vec3(10.0, 100.0, 10.0);
 
             uniform vec3 cam_pos;
 
