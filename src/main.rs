@@ -320,11 +320,13 @@ fn build_ui(
                                 flex,
                                 &mut animation_data.frames_count,
                                 "Number of frames",
+                                None::<f64>,
                             );
                             build_number_settings(
                                 flex,
                                 &mut animation_data.animation_time,
                                 "Animation time",
+                                Some(0.1f32),
                             );
                         });
 
@@ -534,9 +536,9 @@ fn build_xyz_settings(
 ) {
     flex.add_flex(item(), Flex::vertical(), |flex| {
         flex.add(item(), Label::new(title).extend());
-        build_number_settings(flex, &mut postion.0, "X");
-        build_number_settings(flex, &mut postion.1, "Y");
-        build_number_settings(flex, &mut postion.2, "Z");
+        build_number_settings(flex, &mut postion.0, "X", Some(0.01f32));
+        build_number_settings(flex, &mut postion.1, "Y", Some(0.01f32));
+        build_number_settings(flex, &mut postion.2, "Z", Some(0.01f32));
     });
 }
 
@@ -547,10 +549,10 @@ fn build_wxyz_settings(
 ) {
     flex.add_flex(item(), Flex::vertical(), |flex| {
         flex.add(item(), Label::new(title).extend());
-        build_number_settings(flex, &mut postion.0, "W");
-        build_number_settings(flex, &mut postion.1, "X");
-        build_number_settings(flex, &mut postion.2, "Y");
-        build_number_settings(flex, &mut postion.3, "Z");
+        build_number_settings(flex, &mut postion.0, "W", Some(0.01f32));
+        build_number_settings(flex, &mut postion.1, "X", Some(0.01f32));
+        build_number_settings(flex, &mut postion.2, "Y", Some(0.01f32));
+        build_number_settings(flex, &mut postion.3, "Z", Some(0.01f32));
     });
 }
 
@@ -558,9 +560,16 @@ fn build_number_settings<Num: emath::Numeric>(
     flex: &mut egui_flex::FlexInstance<'_>,
     num: &mut Num,
     name: impl Into<WidgetText>,
+    speed: Option<impl Into<f64>>,
 ) {
     flex.add_flex(item(), Flex::horizontal(), |flex| {
-        flex.add(item().grow(1.0), DragValue::new(num));
+        let mut drag_value = DragValue::new(num);
+
+        if let Some(speed) = speed {
+            drag_value = drag_value.speed(speed);
+        }
+
+        flex.add(item().grow(1.0), drag_value);
         flex.add(item(), Label::new(name).extend());
     });
 }
