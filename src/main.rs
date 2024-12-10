@@ -5,7 +5,7 @@ mod block_drawer;
 mod infinite_grid_drawer;
 mod vertex;
 
-use std::f32::consts::PI;
+use std::{f32::consts::PI, ops::RangeInclusive};
 
 use animation::{
     Animation, AnimationAngle, ContinuousAnimationBuilder, DiscreteFrameAnimationBuilder,
@@ -321,12 +321,14 @@ fn build_ui(
                                 &mut animation_data.frames_count,
                                 "Number of frames",
                                 None::<f64>,
+                                Some(2..=255),
                             );
                             build_number_settings(
                                 flex,
                                 &mut animation_data.animation_time,
                                 "Animation time",
                                 Some(0.1f32),
+                                Some(0.1..=300.0),
                             );
                         });
 
@@ -536,9 +538,9 @@ fn build_xyz_settings(
 ) {
     flex.add_flex(item(), Flex::vertical(), |flex| {
         flex.add(item(), Label::new(title).extend());
-        build_number_settings(flex, &mut postion.0, "X", Some(0.01f32));
-        build_number_settings(flex, &mut postion.1, "Y", Some(0.01f32));
-        build_number_settings(flex, &mut postion.2, "Z", Some(0.01f32));
+        build_number_settings(flex, &mut postion.0, "X", Some(0.01f32), None);
+        build_number_settings(flex, &mut postion.1, "Y", Some(0.01f32), None);
+        build_number_settings(flex, &mut postion.2, "Z", Some(0.01f32), None);
     });
 }
 
@@ -549,10 +551,10 @@ fn build_wxyz_settings(
 ) {
     flex.add_flex(item(), Flex::vertical(), |flex| {
         flex.add(item(), Label::new(title).extend());
-        build_number_settings(flex, &mut postion.0, "W", Some(0.01f32));
-        build_number_settings(flex, &mut postion.1, "X", Some(0.01f32));
-        build_number_settings(flex, &mut postion.2, "Y", Some(0.01f32));
-        build_number_settings(flex, &mut postion.3, "Z", Some(0.01f32));
+        build_number_settings(flex, &mut postion.0, "W", Some(0.01f32), None);
+        build_number_settings(flex, &mut postion.1, "X", Some(0.01f32), None);
+        build_number_settings(flex, &mut postion.2, "Y", Some(0.01f32), None);
+        build_number_settings(flex, &mut postion.3, "Z", Some(0.01f32), None);
     });
 }
 
@@ -561,12 +563,17 @@ fn build_number_settings<Num: emath::Numeric>(
     num: &mut Num,
     name: impl Into<WidgetText>,
     speed: Option<impl Into<f64>>,
+    range: Option<RangeInclusive<Num>>,
 ) {
     flex.add_flex(item(), Flex::horizontal(), |flex| {
         let mut drag_value = DragValue::new(num);
 
         if let Some(speed) = speed {
             drag_value = drag_value.speed(speed);
+        }
+
+        if let Some(range) = range {
+            drag_value = drag_value.range(range);
         }
 
         flex.add(item().grow(1.0), drag_value);

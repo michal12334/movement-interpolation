@@ -24,6 +24,8 @@ impl AnimationData {
         Self {
             begin_rotation_quaternion: (1f32, 0f32, 0f32, 0f32),
             end_rotation_quaternion: (1f32, 0f32, 0f32, 0f32),
+            frames_count: 10,
+            animation_time: 10.0,
             ..Default::default()
         }
     }
