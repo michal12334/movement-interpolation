@@ -18,3 +18,13 @@ pub enum QuaternionInterpolationType {
     Linear,
     Spherical,
 }
+
+impl AnimationData {
+    pub fn new() -> Self {
+        Self {
+            begin_rotation_quaternion: (1f32, 0f32, 0f32, 0f32),
+            end_rotation_quaternion: (1f32, 0f32, 0f32, 0f32),
+            ..Default::default()
+        }
+    }
+}

@@ -68,7 +68,7 @@ fn main() {
 
     let infinite_grid_drawer = InfiniteGridDrawer::new(&display);
 
-    let mut animation_data = AnimationData::default();
+    let mut animation_data = AnimationData::new();
     let mut animation: Option<Box<dyn Animation>> = None;
 
     let block = Block::generate(10, &display);
