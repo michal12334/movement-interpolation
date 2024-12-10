@@ -242,8 +242,14 @@ fn get_quaternions_interpolation(
             let cos = begin.dot(&end).clamp(-1f32, 1f32);
             let theta = cos.acos();
             let theta_sin = theta.sin();
-            let s1 = ((1f32 - t) * theta).sin() / theta_sin;
-            let s2 = (t * theta).sin() / theta_sin;
+            let (s1, s2) = if theta_sin == 0.0 {
+                (1f32 - t, t)
+            } else {
+                (
+                    ((1f32 - t) * theta).sin() / theta_sin,
+                    (t * theta).sin() / theta_sin,
+                )
+            };
             s1 * begin.into_inner() + s2 * end.into_inner()
         }
     };
