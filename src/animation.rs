@@ -63,18 +63,8 @@ impl Animation for DiscreteFrameAnimation {
             return;
         }
 
-        let (begin_quaternion, begin_euler) = self.begin_angle.deconstruct();
-        let (end_quaternion, end_euler) = self.end_angle.deconstruct();
-
-        let (begin_euler, end_euler) = {
-            let mut begin = begin_euler;
-            let mut end = end_euler;
-            (begin.x, end.x) = AnimationAngle::angles_shortest_path(begin_euler.x, end_euler.x);
-            (begin.y, end.y) = AnimationAngle::angles_shortest_path(begin_euler.y, end_euler.y);
-            (begin.z, end.z) = AnimationAngle::angles_shortest_path(begin_euler.z, end_euler.z);
-
-            (begin, end)
-        };
+        let (begin_quaternion, begin_euler, end_quaternion, end_euler) =
+            AnimationAngle::get_normalized_angles(&self.begin_angle, &self.end_angle);
 
         self.quaternion_frames = Some(
             (0..self.frames_count)
@@ -108,8 +98,8 @@ impl Animation for DiscreteFrameAnimation {
 
 impl Animation for ContinuousAnimation {
     fn get_quaternion_frames(&self) -> Vec<Matrix4<f32>> {
-        let (begin_quaternion, _) = self.begin_angle.deconstruct();
-        let (end_quaternion, _) = self.end_angle.deconstruct();
+        let (begin_quaternion, _, end_quaternion, _) =
+            AnimationAngle::get_normalized_angles(&self.begin_angle, &self.end_angle);
 
         let x = (self.time_elapsed / self.animation_time) as f32;
         let t = (1f32 - x) * self.begin_position + x * self.end_position;
@@ -123,18 +113,8 @@ impl Animation for ContinuousAnimation {
     }
 
     fn get_euler_frames(&self) -> Vec<Matrix4<f32>> {
-        let (_, begin_euler) = self.begin_angle.deconstruct();
-        let (_, end_euler) = self.end_angle.deconstruct();
-
-        let (begin_euler, end_euler) = {
-            let mut begin = begin_euler;
-            let mut end = end_euler;
-            (begin.x, end.x) = AnimationAngle::angles_shortest_path(begin_euler.x, end_euler.x);
-            (begin.y, end.y) = AnimationAngle::angles_shortest_path(begin_euler.y, end_euler.y);
-            (begin.z, end.z) = AnimationAngle::angles_shortest_path(begin_euler.z, end_euler.z);
-
-            (begin, end)
-        };
+        let (_, begin_euler, _, end_euler) =
+            AnimationAngle::get_normalized_angles(&self.begin_angle, &self.end_angle);
 
         let x = (self.time_elapsed / self.animation_time) as f32;
         let t = (1f32 - x) * self.begin_position + x * self.end_position;
@@ -197,6 +177,40 @@ impl AnimationAngle {
         );
 
         result
+    }
+
+    fn get_normalized_angles(
+        begin: &AnimationAngle,
+        end: &AnimationAngle,
+    ) -> (
+        UnitQuaternion<f32>,
+        Vector3<f32>,
+        UnitQuaternion<f32>,
+        Vector3<f32>,
+    ) {
+        let (begin_quaternion, begin_euler) = begin.deconstruct();
+        let (end_quaternion, end_euler) = end.deconstruct();
+
+        let (begin_euler, end_euler) = {
+            let mut begin = begin_euler;
+            let mut end = end_euler;
+            (begin.x, end.x) = AnimationAngle::angles_shortest_path(begin_euler.x, end_euler.x);
+            (begin.y, end.y) = AnimationAngle::angles_shortest_path(begin_euler.y, end_euler.y);
+            (begin.z, end.z) = AnimationAngle::angles_shortest_path(begin_euler.z, end_euler.z);
+
+            (begin, end)
+        };
+
+        let (begin_quaternion, end_quaternion) = if let AnimationAngle::Euler(_) = begin {
+            (
+                UnitQuaternion::from_euler_angles(begin_euler.x, begin_euler.y, begin_euler.z),
+                UnitQuaternion::from_euler_angles(end_euler.x, end_euler.y, end_euler.z),
+            )
+        } else {
+            (begin_quaternion, end_quaternion)
+        };
+
+        (begin_quaternion, begin_euler, end_quaternion, end_euler)
     }
 
     fn normalize_angle(angle: f32) -> f32 {
