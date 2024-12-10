@@ -147,7 +147,7 @@ impl DiscreteFrameAnimationBuilder {
 
 impl AnimationAngle {
     fn deconstruct(&self) -> (UnitQuaternion<f32>, Vector3<f32>) {
-        match self {
+        let mut result = match self {
             AnimationAngle::Quternion(quaternion) => {
                 let q = UnitQuaternion::from_quaternion(*quaternion);
                 let e = q.euler_angles();
@@ -157,7 +157,13 @@ impl AnimationAngle {
                 UnitQuaternion::from_euler_angles(euler.x, euler.y, euler.z),
                 *euler,
             ),
+        };
+
+        if result.0.norm_squared() < 1e-6 {
+            result.0 = UnitQuaternion::from_quaternion(Quaternion::new(1f32, 0f32, 0f32, 0f32));
         }
+
+        result
     }
 }
 
